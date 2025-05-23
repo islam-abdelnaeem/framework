@@ -1,0 +1,296 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c1163b11-7572-4657-ade2-de8c12f72fdc",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -140,
+        100
+      ],
+      "id": "4ff2ea50-1fbe-4e79-9cde-4ac6084ebede",
+      "name": "Webhook",
+      "webhookId": "c1163b11-7572-4657-ade2-de8c12f72fdc",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first();\n\nconst domainsString = data.json.body.domains;\n\nconst domains = [...new Set(domainsString.split('\\n').filter(domain => domain.trim() !== ''))];\n\nreturn [{\n  text: domains.join('\\n')\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        60,
+        100
+      ],
+      "id": "748bff03-0872-4b8b-b8eb-bc6d948c48d5",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/kali/Bug-bounty/new/domains/domains.txt",
+        "dataPropertyName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        460,
+        100
+      ],
+      "id": "44b25aa0-5905-4abb-ae84-c3c2575d1af8",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "text",
+        "binaryPropertyName": "file",
+        "options": {
+          "encoding": "utf8",
+          "fileName": "domains.txt"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        280,
+        100
+      ],
+      "id": "700605c2-dc49-4c8a-b314-2e78c717320c",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        680,
+        100
+      ],
+      "id": "449d7c7c-83b6-497e-82e6-06c63ecdccc2",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "command": "for domain in $(cat ~/Bug-bounty/new/domains/domains.txt); do assetfinder $domain -subs-only >> ~/Bug-bounty/new/subdomains/assetfinder.txt ; done"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -280
+      ],
+      "id": "f4f88741-25aa-4be6-ae1e-e22096c53fa8",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "command": "for domain in $(cat ~/Bug-bounty/new/domains/domains.txt); do sublist3r -d $domain >> ~/Bug-bounty/new/subdomains/sublist3r.txt ; done"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -40
+      ],
+      "id": "ba7cc78e-916a-4292-9d75-581346d6eef0",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "command": "for domain in $(cat ~/Bug-bounty/new/domains/domains.txt); do findomain -t $domain -q >> ~/Bug-bounty/new/subdomains/findomain.txt ; done"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        900,
+        400
+      ],
+      "id": "a3c1678e-f080-480c-bf15-204abece6902",
+      "name": "Execute Command2"
+    },
+    {
+      "parameters": {
+        "command": "for domain in $(cat ~/Bug-bounty/new/domains/domains.txt); do subfinder -d $domain -all --recursive >> ~/Bug-bounty/new/subdomains/subfinder.txt ; done"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        920,
+        200
+      ],
+      "id": "bf8d605f-6ddf-4ac1-be55-50fcab6565c1",
+      "name": "Execute Command3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        60
+      ],
+      "id": "8a50aab3-2536-4b05-b25c-0894a11c8753",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "command": "cat ~/Bug-bounty/new/subdomains/* | anew | tee ~/Bug-bounty/new/subdomains/all_subdomains.txt"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        60
+      ],
+      "id": "44d43d37-0fe1-40fd-b99d-fc17914f1d33",
+      "name": "Execute Command4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command3": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "Execute Command4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8e254bda-bbed-433f-b94b-73bc445757f3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d50cd755d4fb22bc1a3f80d09d9b8d12b41a19ef9d779ab8949905ca45a75cdc"
+  },
+  "id": "IcVzpAVQZvZ92gmP",
+  "tags": []
+}

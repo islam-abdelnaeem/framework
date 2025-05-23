@@ -1,0 +1,295 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c1163b11-7572-4657-ade2-de8c12f72fdc",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1060,
+        380
+      ],
+      "id": "c48f726f-19ff-4ddd-ad2a-0ac9aa4edfea",
+      "name": "Webhook",
+      "webhookId": "c1163b11-7572-4657-ade2-de8c12f72fdc",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first();\n\nconst domainsString = data.json.body.domains;\n\nconst domains = [...new Set(domainsString.split('\\n').filter(domain => domain.trim() !== ''))];\n\nreturn [{\n  text: domains.join('\\n')\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -860,
+        380
+      ],
+      "id": "803d1a9e-c2c9-4df0-b3c9-a022f5e45caa",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/kali/Bug-bounty/new/domains/domains.txt",
+        "dataPropertyName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        380
+      ],
+      "id": "adde52b8-8f20-4ba8-a81c-2c14409f1fee",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "text",
+        "binaryPropertyName": "file",
+        "options": {
+          "encoding": "utf8",
+          "fileName": "domains.txt"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -640,
+        380
+      ],
+      "id": "844c662d-3200-42df-b4cd-36ab6a84ae0f",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        380
+      ],
+      "id": "b9226691-4b1d-4050-be47-3ca5aae6470b",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "command": "for domain in $(cat /home/kali/Bug-bounty/new/domains/domains.txt); do assetfinder $domain -subs-only >> /home/kali/Bug-bounty/new/subdomains/assetfinder.txt ; done"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7e91a7ed-9582-41ba-bdad-3e8aee877e0a",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "command": "for domain in $(cat /home/kali/Bug-bounty/new/domains/domains.txt); do sudo sublist3r -d $domain >> /home/kali/Bug-bounty/new/subdomains/sublist3r.txt ; done"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        240
+      ],
+      "id": "a623582a-d5e9-46c1-ac82-f359091faf83",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "command": "for domain in $(cat /home/kali/Bug-bounty/new/domains/domains.txt); do findomain -t $domain -q >> /home/kali/Bug-bounty/new/subdomains/findomain.txt ; done"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        20,
+        680
+      ],
+      "id": "695e2758-286d-4f52-91ac-90086df7d280",
+      "name": "Execute Command2"
+    },
+    {
+      "parameters": {
+        "command": "for domain in $(cat /home/kali/Bug-bounty/new/domains/domains.txt); do subfinder -d $domain -all --recursive >> /home/kali/Bug-bounty/new/subdomains/subfinder.txt ; done"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        480
+      ],
+      "id": "9196f8db-dbbc-4038-bddc-f00ea186059a",
+      "name": "Execute Command3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        500,
+        340
+      ],
+      "id": "eb5af3b2-a882-436b-8bc8-00de6f122e22",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "command": "cat /home/kali/Bug-bounty/new/subdomains/* | anew | tee /home/kali/Bug-bounty/new/subdomains/all_subdomains.txt"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        720,
+        340
+      ],
+      "id": "3afcca9c-a53e-4799-98f1-d0e8cfe0fec7",
+      "name": "Execute Command4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Command2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command3": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "Execute Command4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3bd98b6d-18b6-44da-af31-e16d839ab2aa",
+  "meta": {
+    "instanceId": "eb64aff6cb3711487287c6b0559bd4adee68c1a840c54cb4cb83af2433f58732"
+  },
+  "id": "nGLxbic7B3FP1h0A",
+  "tags": []
+}
