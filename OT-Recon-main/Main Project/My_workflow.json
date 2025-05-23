@@ -16,7 +16,8 @@
       "id": "4ff2ea50-1fbe-4e79-9cde-4ac6084ebede",
       "name": "Webhook",
       "webhookId": "c1163b11-7572-4657-ade2-de8c12f72fdc",
-      "notesInFlow": false
+      "notesInFlow": false,
+      "respond": "usingRespondToWebhookNode"
     },
     {
       "parameters": {
@@ -152,6 +153,48 @@
       ],
       "id": "44d43d37-0fe1-40fd-b99d-fc17914f1d33",
       "name": "Execute Command4"
+    },
+    {
+      "parameters": {
+        "filePath": "~/Bug-bounty/new/subdomains/all_subdomains.txt",
+        "options": {}
+      },
+      "id": "read-subdomains-file-node",
+      "name": "Read all_subdomains.txt",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        1860,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const binaryData = $input.first().binary;\nconst textData = Buffer.from(binaryData.data, 'base64').toString('utf8');\nconst subdomains = textData.split('\\n').filter(s => s.trim() !== '');\nreturn { subdomains, count: subdomains.length };"
+      },
+      "id": "format-subdomains-node",
+      "name": "Format Subdomains",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "contentType": "application/json"
+        }
+      },
+      "id": "respond-with-subdomains-node",
+      "name": "Respond with Subdomains",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2300,
+        60
+      ]
     }
   ],
   "pinData": {},
@@ -275,6 +318,39 @@
         [
           {
             "node": "Execute Command4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command4": {
+      "main": [
+        [
+          {
+            "node": "read-subdomains-file-node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read-subdomains-file-node": {
+      "main": [
+        [
+          {
+            "node": "format-subdomains-node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format-subdomains-node": {
+      "main": [
+        [
+          {
+            "node": "respond-with-subdomains-node",
             "type": "main",
             "index": 0
           }
